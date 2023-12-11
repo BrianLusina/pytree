@@ -7,13 +7,14 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-      day: "friday"
-      time: "08:00"
+      day: "saturday"
+      time: "07:00"
       timezone: "Africa/Nairobi"
     labels:
       - "dependencies"
       - "pip"
       - "python"
+      - "chore"
     assignees:
       - dependabot
     reviewers:
