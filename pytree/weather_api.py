@@ -4,8 +4,8 @@ Contains the weather API logic
 from urllib import parse, request, error
 import json
 import sys
-from pyweather.utils import get_api_config
-from pyweather.entities import WeatherData
+from pytree.utils import get_api_config
+from pytree.entities import WeatherData
 
 
 def _build_weather_url(city: str, imperial: bool = False) -> str:

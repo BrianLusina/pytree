@@ -1,8 +1,8 @@
 [tool.poetry]
-name = "pyweather"
+name = "pytree"
 # This version field is not being used. The version field is dynamically updated as below
 version = "0.0.0-post.11+c22f808"
-description = "Weather CLI in the terminal"
+description = "Directory and file listing CLI application"
 authors = ["BrianLusina <12752833+BrianLusina@users.noreply.github.com>"]
 license = "MIT"
 

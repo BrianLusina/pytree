@@ -1,5 +1,5 @@
 import unittest
-from pyweather.entities import WeatherData
+from pytree.entities import WeatherData
 
 
 class WeatherDataTestCase(unittest.TestCase):

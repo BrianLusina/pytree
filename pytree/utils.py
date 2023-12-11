@@ -4,8 +4,8 @@ Utility functions
 from typing import Tuple
 from pathlib import Path
 from configparser import ConfigParser
-from pyweather.entities import ApiConfig, WeatherData
-from pyweather.style import change_color, RESET, WHITE, BLUE, RED, CYAN, YELLOW, REVERSE
+from pytree.entities import ApiConfig, WeatherData
+from pytree.style import change_color, RESET, WHITE, BLUE, RED, CYAN, YELLOW, REVERSE
 
 _SECRETS_FILE = Path(__file__).parent / "secrets.ini"
 _THUNDERSTORM = range(200, 300)
