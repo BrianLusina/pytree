@@ -12,7 +12,7 @@ class DirectoryTree:
     DirectoryTree represents a Directory tree structure. This will be used to generate the directory diagram
     """
 
-    def __init__(self, root_dir: str):
+    def __init__(self, root_dir: Path):
         self._generator = _TreeGenerator(root_dir)
 
     def generate(self):
@@ -26,8 +26,8 @@ class _TreeGenerator:
     Low-level nonpublic tree generator class that parses the directory root provided and returns a tree
     """
 
-    def __init__(self, root_dir: str):
-        self._root_dir: Path = Path(root_dir)
+    def __init__(self, root_dir: Path):
+        self._root_dir = root_dir
         self._tree: List[str] = []
 
     def build_tree(self) -> List[str]:

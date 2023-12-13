@@ -14,22 +14,28 @@ def get_command_line_args() -> Namespace:
     parser = argparse.ArgumentParser(
         prog="pytree",
         description="Gets weather and temperature information for a city",
+        epilog="Thank you for using PyTree CLI"
     )
 
-    # Argument to get the city name, allows users to pass in city names made up of more than 1 word, e.g. New York
+    # TODO: parse version from git tag information
+    parser.version = f"PyTree v0.0.0"
+
+    # Argument to get the version name
     parser.add_argument(
-        "-c",
-        "--city",
-        nargs="+",
+        "-v",
+        "--version",
+        action="version",
+    )
+
+    # Argument to get the directory name
+    parser.add_argument(
+        "-d",
+        "--directory",
+        nargs="?",
+        metavar="ROOT_DIR",
         type=str,
-        help="Enter the city name",
-    )
-
-    parser.add_argument(
-        "-i",
-        "--imperial",
-        action="store_true",
-        help="display daily temperatures in imperial units",
+        default=".",
+        help="Generate full directory tree starting at ROOT_DIR",
     )
 
     return parser.parse_args()
