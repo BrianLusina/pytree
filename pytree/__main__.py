@@ -12,12 +12,13 @@ def main() -> None:
     args = get_command_line_args()
     root_dir = Path(args.root_dir)
     dir_only = args.dir_only
+    output = args.output_file
 
     if not root_dir.is_dir():
         print("The specified root directory doesn't exist")
         sys.exit()
 
-    tree = DirectoryTree(root_dir, dir_only)
+    tree = DirectoryTree(root_dir, dir_only, output_file=output)
     tree.generate()
 
 

@@ -1,6 +1,7 @@
 """
 Defines the CLI command arguments
 """
+import sys
 import argparse
 from argparse import Namespace
 
@@ -42,6 +43,15 @@ def get_command_line_args() -> Namespace:
         "--dir-only",
         action="store_true",
         help="Generate a directory-only tree",
+    )
+
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        metavar="OUTPUT_FILE",
+        nargs="?",
+        default=sys.stdout,
+        help="Generate a full directory tree and save it to a file",
     )
 
     return parser.parse_args()

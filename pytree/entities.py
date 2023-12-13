@@ -2,7 +2,9 @@
 Contains structured models wrapping functionality around data obtained from listing files in a directory
 """
 import os
-from typing import List
+import sys
+from typing import List, Deque
+from collections import deque
 from pathlib import Path
 from pytree.constants import PIPE, ELBOW, TEE, PIPE_PREFIX, SPACE_PREFIX
 
@@ -12,13 +14,20 @@ class DirectoryTree:
     DirectoryTree represents a Directory tree structure. This will be used to generate the directory diagram
     """
 
-    def __init__(self, root_dir: Path, dir_only: bool = False):
+    def __init__(self, root_dir: Path, dir_only: bool = False, output_file=sys.stdout):
         self._generator = _TreeGenerator(root_dir, dir_only)
+        self._output_file = output_file
 
     def generate(self):
         tree = self._generator.build_tree()
-        for entry in tree:
-            print(entry)
+        if self._output_file != sys.stdout:
+            # Wrap tree in Markdown block
+            tree.appendleft("```text")
+            tree.append("```")
+            self._output_file = open(self._output_file, mode="w", encoding="UTF-8")
+        with self._output_file as stream:
+            for entry in tree:
+                print(entry, file=stream)
 
 
 class _TreeGenerator:
@@ -29,9 +38,9 @@ class _TreeGenerator:
     def __init__(self, root_dir: Path, dir_only: bool = False):
         self._root_dir = root_dir
         self._dir_only = dir_only
-        self._tree: List[str] = []
+        self._tree: Deque[str] = deque()
 
-    def build_tree(self) -> List[str]:
+    def build_tree(self) -> Deque[str]:
         self._tree_head()
         self._tree_body(self._root_dir)
         return self._tree
