@@ -12,8 +12,8 @@ class DirectoryTree:
     DirectoryTree represents a Directory tree structure. This will be used to generate the directory diagram
     """
 
-    def __init__(self, root_dir: Path):
-        self._generator = _TreeGenerator(root_dir)
+    def __init__(self, root_dir: Path, dir_only: bool = False):
+        self._generator = _TreeGenerator(root_dir, dir_only)
 
     def generate(self):
         tree = self._generator.build_tree()
@@ -26,8 +26,9 @@ class _TreeGenerator:
     Low-level nonpublic tree generator class that parses the directory root provided and returns a tree
     """
 
-    def __init__(self, root_dir: Path):
+    def __init__(self, root_dir: Path, dir_only: bool = False):
         self._root_dir = root_dir
+        self._dir_only = dir_only
         self._tree: List[str] = []
 
     def build_tree(self) -> List[str]:
@@ -40,8 +41,7 @@ class _TreeGenerator:
         self._tree.append(PIPE)
 
     def _tree_body(self, directory: Path, prefix="") -> None:
-        entries = directory.iterdir()
-        entries = sorted(entries, key=lambda e: e.is_file())
+        entries = self._prepare_entries(directory)
         entries_count = len(entries)
         for index, entry in enumerate(entries):
             connector = ELBOW if index == entries_count - 1 else TEE
@@ -82,3 +82,11 @@ class _TreeGenerator:
             connector (str): Connector to use for displaying the file
         """
         self._tree.append(f"{prefix}{connector} {file.name}")
+
+    def _prepare_entries(self, directory: Path):
+        entries = directory.iterdir()
+        if self._dir_only:
+            entries = [entry for entry in entries if entry.is_dir()]
+            return entries
+        entries = sorted(entries, key=lambda e: e.is_file())
+        return entries

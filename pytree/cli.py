@@ -29,13 +29,19 @@ def get_command_line_args() -> Namespace:
 
     # Argument to get the directory name
     parser.add_argument(
-        "-d",
-        "--directory",
-        nargs="?",
+        "root_dir",
         metavar="ROOT_DIR",
+        nargs="?",
         type=str,
         default=".",
         help="Generate full directory tree starting at ROOT_DIR",
+    )
+
+    parser.add_argument(
+        "-d",
+        "--dir-only",
+        action="store_true",
+        help="Generate a directory-only tree",
     )
 
     return parser.parse_args()

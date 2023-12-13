@@ -10,11 +10,14 @@ from pytree.entities import DirectoryTree
 def main() -> None:
     """Entry point of the weather application. Gets the command line arguments"""
     args = get_command_line_args()
-    root_dir = Path(args.directory)
+    root_dir = Path(args.root_dir)
+    dir_only = args.dir_only
+
     if not root_dir.is_dir():
         print("The specified root directory doesn't exist")
         sys.exit()
-    tree = DirectoryTree(root_dir)
+
+    tree = DirectoryTree(root_dir, dir_only)
     tree.generate()
 
 
