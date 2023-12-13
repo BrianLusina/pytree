@@ -3,8 +3,8 @@ Contains structured models wrapping functionality around data obtained from list
 """
 import os
 from typing import List
-import pathlib
-from pytree.constants import PIPE, ELBOW, TEE
+from pathlib import Path
+from pytree.constants import PIPE, ELBOW, TEE, PIPE_PREFIX, SPACE_PREFIX
 
 
 class DirectoryTree:
@@ -27,19 +27,19 @@ class _TreeGenerator:
     """
 
     def __init__(self, root_dir: str):
-        self._root_dir = pathlib.Path(root_dir)
-        self._tree = []
+        self._root_dir: Path = Path(root_dir)
+        self._tree: List[str] = []
 
-    def build_tree(self) -> List:
+    def build_tree(self) -> List[str]:
         self._tree_head()
         self._tree_body(self._root_dir)
         return self._tree
 
-    def _tree_head(self):
+    def _tree_head(self) -> None:
         self._tree.append(f"{self._root_dir}{os.sep}")
         self._tree.append(PIPE)
 
-    def _tree_body(self, directory, prefix=""):
+    def _tree_body(self, directory: Path, prefix="") -> None:
         entries = directory.iterdir()
         entries = sorted(entries, key=lambda e: e.is_file())
         entries_count = len(entries)
@@ -51,3 +51,34 @@ class _TreeGenerator:
                 )
             else:
                 self._add_file(entry, prefix, connector)
+
+    def _add_directory(self, directory: Path, index: int, entries_count: int, prefix: str, connector: str) -> None:
+        """
+        Adds a directory to be parsed in the tree body to be displayed
+        Args:
+            directory (Path): Directory to parse
+            index (int): Current index in the list
+            entries_count (int): Number of entries in the path
+            prefix (str): The current prefix
+            connector (str): connector being used to build up the tree
+        """
+        self._tree.append(f"{prefix}{connector} {directory.name}{os.sep}")
+        if index != entries_count - 1:
+            prefix += PIPE_PREFIX
+        else:
+            prefix += SPACE_PREFIX
+        self._tree_body(
+            directory=directory,
+            prefix=prefix,
+        )
+        self._tree.append(prefix.rstrip())
+
+    def _add_file(self, file: Path, prefix: str, connector) -> None:
+        """
+        Adds a file to the tree being build
+        Args:
+            file (Path): name of the file
+            prefix (str): Prefix to use for displaying the file
+            connector (str): Connector to use for displaying the file
+        """
+        self._tree.append(f"{prefix}{connector} {file.name}")
