@@ -1,68 +1,84 @@
 """
-Contains structured models wrapping functionality around data obtained from Weather API
+Contains structured models wrapping functionality around data obtained from listing files in a directory
 """
-import sys
-from typing import Dict, Any
-from dataclasses import dataclass
+import os
+from typing import List
+from pathlib import Path
+from pytree.constants import PIPE, ELBOW, TEE, PIPE_PREFIX, SPACE_PREFIX
 
 
-@dataclass
-class ApiConfig:
+class DirectoryTree:
     """
-    ApiConfig that contains information for setting up connection to Weather API
-    Args:
-        api_key (str): API Key used to authenticate with API
-        base_url (str): Base URL of API
+    DirectoryTree represents a Directory tree structure. This will be used to generate the directory diagram
     """
 
-    api_key: str
-    base_url: str
+    def __init__(self, root_dir: str):
+        self._generator = _TreeGenerator(root_dir)
+
+    def generate(self):
+        tree = self._generator.build_tree()
+        for entry in tree:
+            print(entry)
 
 
-@dataclass
-class WeatherData:
+class _TreeGenerator:
     """
-    WeatherData that contains information for weather data as obtained from the Weather API
-    Args:
-        city (str): Name of the city
-        description (str): Description of weather information
-        temperature (float): Temperature information
-        use_imperial (bool): Whether to use imperial units or metric units. Defaults to False using metric units
+    Low-level nonpublic tree generator class that parses the directory root provided and returns a tree
     """
 
-    city: str
-    description: str
-    temperature: float
-    use_imperial: bool = False
-    weather_id: int = 0
+    def __init__(self, root_dir: str):
+        self._root_dir: Path = Path(root_dir)
+        self._tree: List[str] = []
 
-    def __str__(self) -> str:
-        return (
-            f"ID: {self.weather_id}, City: {self.city}, description: {self.description} "
-            f"({self.temperature}°{'F' if self.use_imperial else 'C'})"
-        )
+    def build_tree(self) -> List[str]:
+        self._tree_head()
+        self._tree_body(self._root_dir)
+        return self._tree
 
-    @staticmethod
-    def from_json(data: Dict[str, Any]) -> "WeatherData":
+    def _tree_head(self) -> None:
+        self._tree.append(f"{self._root_dir}{os.sep}")
+        self._tree.append(PIPE)
+
+    def _tree_body(self, directory: Path, prefix="") -> None:
+        entries = directory.iterdir()
+        entries = sorted(entries, key=lambda e: e.is_file())
+        entries_count = len(entries)
+        for index, entry in enumerate(entries):
+            connector = ELBOW if index == entries_count - 1 else TEE
+            if entry.is_dir():
+                self._add_directory(
+                    entry, index, entries_count, prefix, connector
+                )
+            else:
+                self._add_file(entry, prefix, connector)
+
+    def _add_directory(self, directory: Path, index: int, entries_count: int, prefix: str, connector: str) -> None:
         """
-        Factory method to create WeatherData instance from passed in dictionary data
+        Adds a directory to be parsed in the tree body to be displayed
         Args:
-            data (dict):
-        Returns:
-            WeatherData: weather data
+            directory (Path): Directory to parse
+            index (int): Current index in the list
+            entries_count (int): Number of entries in the path
+            prefix (str): The current prefix
+            connector (str): connector being used to build up the tree
         """
-        try:
-            city = data["name"]
-            weather_description = data["weather"][0]["description"]
-            temperature = data["main"]["temp"]
-            weather_id = data["weather"][0]["id"]
+        self._tree.append(f"{prefix}{connector} {directory.name}{os.sep}")
+        if index != entries_count - 1:
+            prefix += PIPE_PREFIX
+        else:
+            prefix += SPACE_PREFIX
+        self._tree_body(
+            directory=directory,
+            prefix=prefix,
+        )
+        self._tree.append(prefix.rstrip())
 
-            return WeatherData(
-                city=city,
-                description=weather_description,
-                temperature=temperature,
-                weather_id=weather_id,
-            )
-        # pylint: disable=broad-exception-caught
-        except Exception as e:
-            sys.exit(f"Could not parse weather data. Error: {e}")
+    def _add_file(self, file: Path, prefix: str, connector) -> None:
+        """
+        Adds a file to the tree being build
+        Args:
+            file (Path): name of the file
+            prefix (str): Prefix to use for displaying the file
+            connector (str): Connector to use for displaying the file
+        """
+        self._tree.append(f"{prefix}{connector} {file.name}")
