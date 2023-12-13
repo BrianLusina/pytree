@@ -14,20 +14,25 @@ class DirectoryTree:
     DirectoryTree represents a Directory tree structure. This will be used to generate the directory diagram
     """
 
-    def __init__(self, root_dir: Path, dir_only: bool = False, output_file=sys.stdout):
+    def __init__(
+            self,
+            root_dir: Path,
+            dir_only: bool = False,
+            output_file: bytes | str | Path = sys.stdout,  # type: ignore[assignment, comparison-overlap]
+    ):
         self._generator = _TreeGenerator(root_dir, dir_only)
         self._output_file = output_file
 
-    def generate(self):
+    def generate(self) -> None:
         tree = self._generator.build_tree()
-        if self._output_file != sys.stdout:
+        if self._output_file != sys.stdout:  # type: ignore[comparison-overlap]
             # Wrap tree in Markdown block
             tree.appendleft("```text")
             tree.append("```")
-            self._output_file = open(self._output_file, mode="w", encoding="UTF-8")
-        with self._output_file as stream:
+            self._output_file = open(file=self._output_file, mode="w", encoding="UTF-8")  # type: ignore[assignment]
+        with self._output_file as stream:  # type: ignore[union-attr]
             for entry in tree:
-                print(entry, file=stream)
+                print(entry, file=stream)  # type: ignore[arg-type]
 
 
 class _TreeGenerator:
@@ -49,19 +54,24 @@ class _TreeGenerator:
         self._tree.append(f"{self._root_dir}{os.sep}")
         self._tree.append(PIPE)
 
-    def _tree_body(self, directory: Path, prefix="") -> None:
+    def _tree_body(self, directory: Path, prefix: str = "") -> None:
         entries = self._prepare_entries(directory)
         entries_count = len(entries)
         for index, entry in enumerate(entries):
             connector = ELBOW if index == entries_count - 1 else TEE
             if entry.is_dir():
-                self._add_directory(
-                    entry, index, entries_count, prefix, connector
-                )
+                self._add_directory(entry, index, entries_count, prefix, connector)
             else:
                 self._add_file(entry, prefix, connector)
 
-    def _add_directory(self, directory: Path, index: int, entries_count: int, prefix: str, connector: str) -> None:
+    def _add_directory(
+            self,
+            directory: Path,
+            index: int,
+            entries_count: int,
+            prefix: str,
+            connector: str,
+    ) -> None:
         """
         Adds a directory to be parsed in the tree body to be displayed
         Args:
@@ -82,7 +92,7 @@ class _TreeGenerator:
         )
         self._tree.append(prefix.rstrip())
 
-    def _add_file(self, file: Path, prefix: str, connector) -> None:
+    def _add_file(self, file: Path, prefix: str, connector: str) -> None:
         """
         Adds a file to the tree being build
         Args:
@@ -92,10 +102,8 @@ class _TreeGenerator:
         """
         self._tree.append(f"{prefix}{connector} {file.name}")
 
-    def _prepare_entries(self, directory: Path):
+    def _prepare_entries(self, directory: Path) -> List[Path]:
         entries = directory.iterdir()
         if self._dir_only:
-            entries = [entry for entry in entries if entry.is_dir()]
-            return entries
-        entries = sorted(entries, key=lambda e: e.is_file())
-        return entries
+            return [entry for entry in entries if entry.is_dir()]
+        return sorted(entries, key=lambda e: e.is_file())

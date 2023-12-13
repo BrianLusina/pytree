@@ -15,11 +15,8 @@ def get_command_line_args() -> Namespace:
     parser = argparse.ArgumentParser(
         prog="pytree",
         description="Gets weather and temperature information for a city",
-        epilog="Thank you for using PyTree CLI"
+        epilog="Thank you for using PyTree CLI",
     )
-
-    # TODO: parse version from git tag information
-    parser.version = f"PyTree v0.0.0"
 
     # Argument to get the version name
     parser.add_argument(
